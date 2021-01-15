@@ -24,14 +24,14 @@ namespace CroppingImageLibrary.Services
 
     public class CropService
     {
-        private readonly CropAdorner _cropAdorner;
-        private readonly Canvas _canvas;
-        private readonly Tools.CropTool _cropTool;
+        private CropAdorner _cropAdorner;
+        private Canvas _canvas;
+        private Tools.CropTool _cropTool;
 
         private IToolState _currentToolState;
-        private readonly IToolState _createState;
-        private readonly IToolState _dragState;
-        private readonly IToolState _completeState;
+        private IToolState _createState;
+        private IToolState _dragState;
+        private IToolState _completeState;
 
         public Adorner Adorner => _cropAdorner;
 
@@ -43,13 +43,15 @@ namespace CroppingImageLibrary.Services
 
         public CropService(FrameworkElement adornedElement)
         {
+            FrameworkElement el = (FrameworkElement)adornedElement.FindName("SourceImage");
+
             _canvas = new Canvas
             {
-                Height = adornedElement.ActualHeight,
-                Width = adornedElement.ActualWidth
+                Height = el.ActualHeight,
+                Width = el.ActualWidth
             };
-            _cropAdorner = new CropAdorner(adornedElement, _canvas);
-            var adornerLayer = AdornerLayer.GetAdornerLayer(adornedElement);
+            _cropAdorner = new CropAdorner(el, _canvas);
+            var adornerLayer = AdornerLayer.GetAdornerLayer(el);
             Debug.Assert(adornerLayer != null, nameof(adornerLayer) + " != null");
             adornerLayer.Add(_cropAdorner);
 
@@ -80,6 +82,11 @@ namespace CroppingImageLibrary.Services
             _cropTool.Redraw(0, 0, 0, 0);
         }
 
+        public void ShowText(bool isVisible)
+        {
+            _cropTool.ShowText(isVisible);
+        }
+
         public CropArea GetCroppedArea() =>
             new CropArea(
                 _cropAdorner.RenderSize,
@@ -98,9 +105,68 @@ namespace CroppingImageLibrary.Services
             var newPosition = _currentToolState.OnMouseMove(point);
             if (newPosition.HasValue)
             {
-                _cropTool.Redraw(newPosition.Value.Left, newPosition.Value.Top, newPosition.Value.Width, newPosition.Value.Height);
+                _cropTool.Redraw(newPosition.Value.Left, newPosition.Value.Top, (int)newPosition.Value.Width, (int)newPosition.Value.Height);
+            }
+        }
+
+        public void SetKeepRatio(bool KeepRatio)
+        {
+            _cropTool.SetKeepRatio(KeepRatio);
+            _cropTool.SetRatio((float)_cropTool.Width / (float)_cropTool.Height);
+        }
+
+        public void SetRatio(float Ratio)
+        {
+            _cropTool.SetRatio(Ratio);
+        }
+
+        public void SetCropArea(double Width, double Height)
+        {
+            _cropTool.Redraw(0, 0, Width, Height);
+        }
+
+        public void SetCropAreaRatio(double Width, double Height, int rWidth, int rHeight)
+        {
+            float ratio = (float)rWidth / (float)rHeight;
+
+            SetRatio(ratio);
+
+            double NewWidth = Width;
+            double NewHeight = Height;
+
+            if (ratio == 1)
+            {
+                if (Width >= Height)
+                {
+                    NewWidth = Height;
+                }
+                else
+                {
+                    NewHeight = Width;
+                }
+            }
+            else if (ratio > 1)
+            {
+                NewHeight = (int)(1f * Width / ratio);
+
+                if (NewHeight > Height)
+                {
+                    NewHeight = Width;
+                    NewWidth = (int)(1f * Height * ratio);
+                }
+            }
+            else
+            {
+                NewWidth = (int)(1f * Height * ratio);
+
+                if (NewWidth > Width)
+                {
+                    NewWidth = Width;
+                    NewHeight = (int)(1f * Width / ratio);
+                }
             }
 
+            _cropTool.Redraw(0, 0, (int)NewWidth, (int)NewHeight);
         }
 
         private void AdornerOnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

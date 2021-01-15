@@ -12,6 +12,8 @@ namespace CroppingImageLibrary.Services.Tools
         public TextBlock TextBlock { get; }
         private readonly CropTool _cropTool;
 
+        private bool TextVisible = true;
+
         public TextTool(CropTool cropTool)
         {
             _cropTool = cropTool;
@@ -32,7 +34,19 @@ namespace CroppingImageLibrary.Services.Tools
         /// <param name="isVisible">Set current visibility</param>
         public void ShowText(bool isVisible)
         {
-            TextBlock.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+            if (TextVisible)
+            {
+                TextBlock.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+            }
+            else
+            {
+                TextBlock.Visibility = Visibility.Hidden;
+            }
+        }
+
+        public void SetShowText(bool isVisible)
+        {
+            TextVisible = isVisible;
         }
 
         /// <summary>

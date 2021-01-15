@@ -68,6 +68,9 @@ namespace CroppingImageLibrary.Services.Tools
         private readonly Canvas _canvas;
         private readonly double _thumbSize = 10;
 
+        private bool _KeepRatio = false;
+        private float _Ratio = 0;
+
         public ThumbTool(Canvas canvas, CropTool cropTool)
         {
             _canvas = canvas;
@@ -107,7 +110,14 @@ namespace CroppingImageLibrary.Services.Tools
             double resultHeight = thumbResultTop - _cropTool.TopLeftY + _thumbSize / 2;
             double resultWidth = resultThumbLeft - _cropTool.TopLeftX;
 
-            _cropTool.Redraw(_cropTool.TopLeftX, _cropTool.TopLeftY, resultWidth, resultHeight);
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(_cropTool.TopLeftX, _cropTool.TopLeftY, resultWidth, resultHeight);
+            }
+            else
+            {
+                ResizeWithKeepRatio(_cropTool.TopLeftX, _cropTool.TopLeftY, resultWidth, resultHeight);
+            }
         }
 
         private void BottomLeft_DragDelta(object sender, DragDeltaEventArgs e)
@@ -127,7 +137,15 @@ namespace CroppingImageLibrary.Services.Tools
             double offset = Canvas.GetLeft(thumb) - resultThumbLeft;
             double resultLeft = resultThumbLeft + _thumbSize / 2;
             double resultWidth = _cropTool.Width + offset;
-            _cropTool.Redraw(resultLeft, _cropTool.TopLeftY, resultWidth, resultHeight);
+            
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(resultLeft, _cropTool.TopLeftY, resultWidth, resultHeight);
+            }
+            else
+            {
+                ResizeWithKeepRatio(resultLeft, _cropTool.TopLeftY, resultWidth, resultHeight);
+            }
         }
 
         private void TopRight_DragDelta(object sender, DragDeltaEventArgs e)
@@ -149,7 +167,15 @@ namespace CroppingImageLibrary.Services.Tools
                 newLeft = _canvas.ActualWidth;
 
             double resultWidth = newLeft - _cropTool.TopLeftX;
-            _cropTool.Redraw(_cropTool.TopLeftX, resultTop, resultWidth, resultHeight);
+            
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(_cropTool.TopLeftX, resultTop, resultWidth, resultHeight);
+            }
+            else
+            {
+                ResizeWithKeepRatio(_cropTool.TopLeftX, resultTop, resultWidth, resultHeight);
+            }
         }
 
         private void TopLeft_DragDelta(object sender, DragDeltaEventArgs e)
@@ -171,7 +197,14 @@ namespace CroppingImageLibrary.Services.Tools
             double resultLeft = newLeft + _thumbSize / 2;
             double resultWidth = _cropTool.Width + offsetLeft;
 
-            _cropTool.Redraw(resultLeft, resultTop, resultWidth, resultHeight);
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(resultLeft, resultTop, resultWidth, resultHeight);
+            }
+            else
+            {
+                ResizeWithKeepRatio(resultLeft, resultTop, resultWidth, resultHeight);
+            }
         }
 
         private void RightMiddle_DragDelta(object sender, DragDeltaEventArgs e)
@@ -183,7 +216,15 @@ namespace CroppingImageLibrary.Services.Tools
                 resultThumbLeft = _canvas.ActualWidth;
 
             double resultWidth = resultThumbLeft - _cropTool.TopLeftX;
-            _cropTool.Redraw(_cropTool.TopLeftX, _cropTool.TopLeftY, resultWidth, _cropTool.Height);
+
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(_cropTool.TopLeftX, _cropTool.TopLeftY, resultWidth, _cropTool.Height);
+            }
+            else
+            {
+                ResizeWithKeepRatio(_cropTool.TopLeftX, _cropTool.TopLeftY, resultWidth, _cropTool.Height);
+            }
         }
 
         private void TopMiddle_DragDelta(object sender, DragDeltaEventArgs e)
@@ -197,7 +238,15 @@ namespace CroppingImageLibrary.Services.Tools
             double offset = Canvas.GetTop(thumb) - resultThumbTop;
             double resultHeight = _cropTool.Height + offset;
             double resultTop = resultThumbTop + _thumbSize / 2;
-            _cropTool.Redraw(_cropTool.TopLeftX, resultTop, _cropTool.Width, resultHeight);
+
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(_cropTool.TopLeftX, resultTop, _cropTool.Width, resultHeight);
+            }
+            else
+            {
+                ResizeWithKeepRatio(_cropTool.TopLeftX, resultTop, _cropTool.Width, resultHeight);
+            }
         }
 
         private void LeftMiddle_DragDelta(object sender, DragDeltaEventArgs e)
@@ -211,7 +260,15 @@ namespace CroppingImageLibrary.Services.Tools
             double offset = Canvas.GetLeft(thumb) - resultThumbLeft;
             double resultLeft = resultThumbLeft + _thumbSize / 2;
             double resultWidth = _cropTool.Width + offset;
-            _cropTool.Redraw(resultLeft, _cropTool.TopLeftY, resultWidth, _cropTool.Height);
+
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(resultLeft, _cropTool.TopLeftY, resultWidth, _cropTool.Height);
+            }
+            else
+            {
+                ResizeWithKeepRatio(resultLeft, _cropTool.TopLeftY, resultWidth, _cropTool.Height);
+            }
         }
 
         private void BottomMiddle_DragDelta(object sender, DragDeltaEventArgs e)
@@ -222,7 +279,67 @@ namespace CroppingImageLibrary.Services.Tools
             if (thumbResultTop > _canvas.ActualHeight)
                 thumbResultTop = _canvas.ActualHeight;
 
-            _cropTool.Redraw(_cropTool.TopLeftX, _cropTool.TopLeftY, _cropTool.Width, thumbResultTop - _cropTool.TopLeftY);
+            if (!_KeepRatio || _Ratio == 0)
+            {
+                _cropTool.Redraw(_cropTool.TopLeftX, _cropTool.TopLeftY, _cropTool.Width, thumbResultTop - _cropTool.TopLeftY);
+            }
+            else
+            {
+                ResizeWithKeepRatio(_cropTool.TopLeftX, _cropTool.TopLeftY, _cropTool.Width, thumbResultTop - _cropTool.TopLeftY);
+            }
+        }
+
+
+        public void SetKeepRatio(bool KeepRatio)
+        {
+            _KeepRatio = KeepRatio;
+
+            ShowThumbs(true);
+        }
+
+        public void SetRatio(float Ratio)
+        {
+            _Ratio = Ratio;
+        }
+
+        private void ResizeWithKeepRatio(double X, double Y, double Width, double Height)
+        {
+            double NewWidth = Width;
+            double NewHeight = Height;
+
+            if (_Ratio == 1)
+            {
+                if (Width >= Height)
+                {
+                    NewWidth = Height;
+                }
+                else
+                {
+                    NewHeight = Width;
+                }
+            }
+            else if (_Ratio > 1)
+            {
+                NewHeight = (int)(1f * Width / _Ratio);
+
+                if (NewHeight > Height)
+                {
+                    NewHeight = Width;
+                    NewWidth = (int)(1f * Height * _Ratio);
+                }
+            }
+            else
+            {
+                NewWidth = (int)(1f * Height * _Ratio);
+
+                if (NewWidth > Width)
+                {
+                    NewWidth = Width;
+                    NewHeight = (int)(1f * Width / _Ratio);
+                }
+            }
+
+            _cropTool.Redraw(X, Y, NewWidth, NewHeight);
         }
 
 
@@ -247,6 +364,7 @@ namespace CroppingImageLibrary.Services.Tools
 
         private void ShowThumbs(bool isVisible)
         {
+            /*
             if (_cropTool.Height > 0 && _cropTool.Width > 0)
             {
                 BottomMiddle.Visibility = Visibility.Visible;
@@ -268,6 +386,58 @@ namespace CroppingImageLibrary.Services.Tools
                 TopRight.Visibility = Visibility.Hidden;
                 BottomLeft.Visibility = Visibility.Hidden;
                 BottomRight.Visibility = Visibility.Hidden;
+            }
+            */
+
+            if (_KeepRatio)
+            {
+                if (_cropTool.Height > 0 && _cropTool.Width > 0)
+                {
+                    BottomMiddle.Visibility = Visibility.Hidden;
+                    LeftMiddle.Visibility = Visibility.Hidden;
+                    TopMiddle.Visibility = Visibility.Hidden;
+                    RightMiddle.Visibility = Visibility.Hidden;
+                    TopLeft.Visibility = Visibility.Visible;
+                    TopRight.Visibility = Visibility.Visible;
+                    BottomLeft.Visibility = Visibility.Visible;
+                    BottomRight.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    BottomMiddle.Visibility = Visibility.Hidden;
+                    LeftMiddle.Visibility = Visibility.Hidden;
+                    TopMiddle.Visibility = Visibility.Hidden;
+                    RightMiddle.Visibility = Visibility.Hidden;
+                    TopLeft.Visibility = Visibility.Hidden;
+                    TopRight.Visibility = Visibility.Hidden;
+                    BottomLeft.Visibility = Visibility.Hidden;
+                    BottomRight.Visibility = Visibility.Hidden;
+                }
+            }
+            else
+            {
+                if (_cropTool.Height > 0 && _cropTool.Width > 0)
+                {
+                    BottomMiddle.Visibility = Visibility.Visible;
+                    LeftMiddle.Visibility = Visibility.Visible;
+                    TopMiddle.Visibility = Visibility.Visible;
+                    RightMiddle.Visibility = Visibility.Visible;
+                    TopLeft.Visibility = Visibility.Visible;
+                    TopRight.Visibility = Visibility.Visible;
+                    BottomLeft.Visibility = Visibility.Visible;
+                    BottomRight.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    BottomMiddle.Visibility = Visibility.Hidden;
+                    LeftMiddle.Visibility = Visibility.Hidden;
+                    TopMiddle.Visibility = Visibility.Hidden;
+                    RightMiddle.Visibility = Visibility.Hidden;
+                    TopLeft.Visibility = Visibility.Hidden;
+                    TopRight.Visibility = Visibility.Hidden;
+                    BottomLeft.Visibility = Visibility.Hidden;
+                    BottomRight.Visibility = Visibility.Hidden;
+                }
             }
         }
     }

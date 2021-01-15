@@ -19,6 +19,7 @@ namespace CroppingImageLibrary.Services.Tools
         public double Height => _cropShape.Shape.Height;
         public double Width => _cropShape.Shape.Width;
 
+
         public CropTool(Canvas canvas)
         {
             _canvas = canvas;
@@ -61,6 +62,21 @@ namespace CroppingImageLibrary.Services.Tools
             _shadeService.Redraw();
             _thumbService.Redraw();
             _textService.Redraw();
+        }
+
+        public void SetKeepRatio(bool KeepRatio)
+        {
+            _thumbService.SetKeepRatio(KeepRatio);
+        }
+
+        public void SetRatio(float Ratio)
+        {
+            _thumbService.SetRatio(Ratio);
+        }
+
+        public void ShowText(bool isVisible)
+        {
+            _textService.SetShowText(isVisible);
         }
     }
 }
