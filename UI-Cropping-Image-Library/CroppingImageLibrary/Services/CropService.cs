@@ -151,7 +151,7 @@ namespace CroppingImageLibrary.Services
 
                 if (NewHeight > Height)
                 {
-                    NewHeight = Width;
+                    NewHeight = Height;
                     NewWidth = (int)(1f * Height * ratio);
                 }
             }
